@@ -1,29 +1,39 @@
 #!/bin/bash
 
 NAMESPACE="weka-operator-system"
+POD_MATCH="drive"
 KUBECONFIG_PATH=""
-
-# First: extract --kubeconfig from args if present
 ARGS=()
+
+usage() {
+  echo "Usage: kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod <pattern>] [-it] [watch [watch-options]] [weka-subcommand]..."
+  echo ""
+  echo "Examples:"
+  echo "  kwekash                                         # Run 'weka status' on the pod (default)"
+  echo "  kwekash -it                                     # Open interactive shell on first matching pod"
+  echo "  kwekash status                                  # Run 'weka status'"
+  echo "  kwekash local ps                                # Run 'weka local ps'"
+  echo "  kwekash watch status                            # Watch 'weka status'"
+  echo "  kwekash --pod compute status                    # Show status on compute pod"
+  echo "  kwekash --kubeconfig ~/.kube/dev.yaml           # Use alternate kubeconfig"
+  echo "  kwekash --help                                  # Show this help"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --kubeconfig)
-      shift
-      if [[ -z "$1" ]]; then
-        echo "❌ Error: --kubeconfig requires a path argument."
-        exit 1
-      fi
-      KUBECONFIG_PATH="$1"
-      shift
-      ;;
+      shift; KUBECONFIG_PATH="$1"; shift ;;
+    --namespace)
+      shift; NAMESPACE="$1"; shift ;;
+    --pod)
+      shift; POD_MATCH="$1"; shift ;;
+    --help)
+      usage; exit 0 ;;
     *)
-      ARGS+=("$1")
-      shift
-      ;;
+      ARGS+=("$1"); shift ;;
   esac
 done
 
-# Default to env var if not passed explicitly
 if [[ -z "$KUBECONFIG_PATH" ]]; then
   if [[ -n "$KUBECONFIG" ]]; then
     KUBECONFIG_PATH="$KUBECONFIG"
@@ -33,29 +43,9 @@ if [[ -z "$KUBECONFIG_PATH" ]]; then
   fi
 fi
 
-# Use kubecolor if available, fallback to kubectl
 KUBECMD=$(command -v kubecolor || echo "kubectl")
 KUBECTL="$KUBECMD --kubeconfig $KUBECONFIG_PATH"
-
-# Get the pod name
-POD=$($KUBECTL get pods -n "$NAMESPACE" | grep -m1 drive | awk '{print $1}')
-
-usage() {
-  echo "Usage: kwekash [--kubeconfig <path>] [-it] [watch [watch-options]] [weka-subcommand]..."
-  echo ""
-  echo "Examples:"
-  echo "  kwekash --kubeconfig ~/.kube/dev.yaml          # Use alternate kubeconfig"
-  echo "  kwekash                                        # Run 'weka status' on the pod"
-  echo "  kwekash -it                                    # Open interactive shell"
-  echo "  kwekash watch status                           # Run 'watch weka status'"
-  echo "  kwekash watch -n 2 local ps                    # Run 'watch -n 2 weka local ps'"
-  echo "  kwekash --help                                 # Show this help"
-}
-
-if [[ "${ARGS[0]}" == "--help" ]]; then
-  usage
-  exit 0
-fi
+POD=$($KUBECTL get pods -n "$NAMESPACE" | grep -m1 "$POD_MATCH" | awk '{print $1}')
 
 echo "🔍 Using pod: $POD in namespace: $NAMESPACE"
 echo "📁 Using kubeconfig: $KUBECONFIG_PATH"

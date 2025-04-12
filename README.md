@@ -1,15 +1,15 @@
 # kwekash
 
-**kwekash** is a shell utility to easily run `weka` commands on the first available drive pod in your WEKA Kubernetes cluster.
+**kwekash** is a shell utility to easily run `weka` commands on the first available matching pod in your WEKA Kubernetes cluster.
 
-It supports default actions, interactive mode, real-time monitoring via `watch`, and multiple kubeconfig contexts.
+It supports default actions, interactive mode, real-time monitoring via `watch`, multiple kubeconfig contexts, and advanced pod/namespace targeting.
 
 ---
 
 ## 🔧 Installation
 
 ```bash
-git clone https://github.com/ropeck/kwekash.git
+git clone https://github.com/yourusername/kwekash.git
 cd kwekash
 make install
 ```
@@ -23,51 +23,62 @@ This installs:
 ## 🧰 Usage
 
 ```bash
-kwekash [--kubeconfig <path>] [-it] [watch [watch-options]] [weka subcommand]
+kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod <pattern>] [-it] [watch [watch-options]] [weka subcommand]
 ```
 
 ### 📘 Examples
 
-| Command                                 | Description                                      |
-|----------------------------------------|--------------------------------------------------|
-| `kwekash`                               | Run `weka status` on the pod (default)          |
-| `kwekash status`                        | Run `weka status` explicitly                    |
-| `kwekash local ps`                      | Run `weka local ps`                             |
-| `kwekash -it`                           | Open an interactive shell on the pod            |
-| `kwekash watch status`                 | Watch `weka status` on the pod in real-time     |
-| `kwekash watch -n 2 local ps`          | Watch `weka local ps` every 2 seconds           |
-| `kwekash --kubeconfig ~/.kube/stage`   | Use a specific kubeconfig context               |
+| Command                                                  | Description                                                  |
+|-----------------------------------------------------------|--------------------------------------------------------------|
+| `kwekash`                                                 | Run `weka status` on the first matching pod                 |
+| `kwekash status`                                          | Run `weka status`                                           |
+| `kwekash local ps`                                        | Run `weka local ps`                                         |
+| `kwekash -it`                                             | Open interactive shell on the first matching pod            |
+| `kwekash watch status`                                   | Watch `weka status` every 2 seconds                         |
+| `kwekash watch -n 2 local ps`                            | Watch `weka local ps` every 2 seconds                       |
+| `kwekash --kubeconfig ~/.kube/staging`                   | Use an alternate kubeconfig file                            |
+| `kwekash --namespace dev --pod frontend status`    | Target a pod matching "frontend" in the "dev" namespace     |
+
+---
+
+## 🔧 Advanced Pod Targeting
+
+Use these flags to customize the pod and namespace selection:
+
+| Option                  | Description                                                   |
+|-------------------------|---------------------------------------------------------------|
+| `--namespace <name>`    | Set the Kubernetes namespace (default: `weka-operator-system`) |
+| `--pod <pattern>` | Match a pod name substring (default: `drive`)                 |
 
 ---
 
 ## 🌐 Kubeconfig Support
 
-- You can specify a kubeconfig using `--kubeconfig <path>`
-- If `--kubeconfig` is not passed, it will fall back to the `KUBECONFIG` environment variable
+- Specify a kubeconfig using `--kubeconfig <path>`
+- If not passed, `$KUBECONFIG` is used
 - If neither is set, `kwekash` will exit with an error
 
 ---
 
 ## 🔍 Requirements
 
-- `kubectl` (or [`kubecolor`](https://github.com/hidetatz/kubecolor), preferred if installed)
-- A running WEKA cluster with drive pods in the `weka-operator-system` namespace
-- `watch` utility available in the pod (usually pre-installed in WEKA pods)
+- `kubectl` or [`kubecolor`](https://github.com/hidetatz/kubecolor)
+- A running WEKA cluster with pods (default: drive pods)
+- `watch` utility (installed in WEKA CLI containers)
 
 ---
 
 ## 📖 Manual Page
 
-To view the manual:
-
 ```bash
 man kwekash
 ```
 
-If needed, ensure `~/.local/share/man` is in your `MANPATH`:
+If needed on macOS:
 
 ```bash
-export MANPATH="$HOME/.local/share/man:$MANPATH"
+echo 'export MANPATH=$HOME/.local/share/man:$MANPATH' >> ~/.zshrc
+source ~/.zshrc
 ```
 
 ---
