@@ -17,10 +17,11 @@ It supports real-time monitoring, interactive shells, multiple clusters, and fle
 
 ## 🔧 Installation
 
-### 📦 Option 1: From PyPI (once published)
+### 📦 Option 1: From PyPI
 
 ```bash
-pip install kwekash
+sudo apt install -y pipx
+pipx install kwekash
 ```
 
 Then just run:
