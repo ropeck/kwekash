@@ -1,93 +1,51 @@
-.TH kwekash 1 "April 2025" "kwekash 1.3" "User Commands"
+.TH kwekash 1 "April 2025" "kwekash 1.4" "User Commands"
 .SH NAME
 kwekash \- run weka commands inside a WEKA drive pod
 
 .SH SYNOPSIS
-kwekash [--kubeconfig <path>] [-it] [watch [watch-options]] [weka-subcommand ...]
+kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod <pattern>] [-it] [watch [watch-options]] [weka-subcommand ...]
 
 .SH DESCRIPTION
-kwekash is a helper script to run weka CLI commands inside the first available
-WEKA drive pod in your Kubernetes cluster.
-
-It simplifies debugging and monitoring common WEKA commands and supports interactive shell access,
-periodic status updates via watch, and targeting specific kubeconfig contexts.
+Run weka CLI commands in the first matching WEKA pod in your Kubernetes cluster.
+Defaults to 'drive' pods in 'weka-operator-system' namespace.
 
 .SH OPTIONS
 .TP
 --kubeconfig <path>
-Specify the kubeconfig file to use when interacting with the Kubernetes cluster.
-If not specified, kwekash will attempt to use the KUBECONFIG environment variable.
+Specify the kubeconfig to use. Required if KUBECONFIG is not set.
 
-Note: This option is only used for selecting the target cluster. It is not passed to the `weka` command.
+.TP
+--namespace <ns>
+Namespace to search for WEKA pods. Defaults to 'weka-operator-system'.
+
+.TP
+--pod <pattern>
+String to match the pod name. Defaults to 'drive'.
 
 .TP
 -it
-Open an interactive bash shell inside the pod.
+Start an interactive shell inside the pod.
 
 .TP
 watch
-Run the given weka subcommand using the watch utility inside the pod.
-You may include standard watch flags such as -n (interval) or -d (highlight).
+Use 'watch' inside the pod to run and repeat a weka subcommand.
 
 .SH EXAMPLES
 .TP
 kwekash
-Run "weka status" on the pod.
-
-.TP
-kwekash status
-Run "weka status" explicitly.
-
-.TP
-kwekash local ps
-Run "weka local ps" on the pod.
-
-.TP
-kwekash watch status
-Run "watch weka status" on the pod.
-
-.TP
-kwekash watch -n 2 local ps
-Run "watch -n 2 weka local ps" to refresh every 2 seconds.
+Run 'weka status' on the first matching pod.
 
 .TP
 kwekash -it
-Start an interactive shell on the pod.
+Start an interactive shell.
 
 .TP
-kwekash --kubeconfig ~/.kube/staging
-Use a specific kubeconfig file to connect to a different cluster.
+kwekash watch -n 2 local ps
+Watch 'weka local ps' every 2 seconds.
 
 .TP
-Example output of: kwekash watch -n 2 status \; alerts
-Watch command running every 2 seconds, showing status and active alerts.
-
-.nf
-Every 2.0s: weka status ; weka alerts                                          gaae4a4: Sat Apr 12 01:35:37 2025
-
-WekaIO v4.4.5.118-k8s.4 (CLI build 4.4.5.118-k8s.4)
-
-       cluster: weka-cluster-staging (uuid-uuid-uuid-uuid)
-        status: OK (12 backend containers UP, 36 drives UP)
-    protection: 3+2 (Fully protected)
-     hot spare: 1 failure domains (22.63 TiB)
- drive storage: 113.15 TiB total, 112.01 TiB unprovisioned
-         cloud: connected
-       license: Unlicensed
-
-     io status: STARTED 6 hours ago (108 io-nodes UP, 936 Buckets UP)
-    link layer: Infiniband + Ethernet
-       clients: 9 connected
-         reads: 0 B/s (0 IO/s)
-        writes: 0 B/s (0 IO/s)
-    operations: 0 ops/s
-        alerts: 1 active alerts, use `weka alerts` to list them
-
-TYPE                       SEVERITY  START TIME  COUNT  TITLE                DESCRIPTION
-                     HOW TO HANDLE
-NoClusterLicense           WARNING   6:26:18h    1      No license assigned  No license is assigned to the clust
-er.                  Obtain and install a license from get.weka.io.
-.fi
+kwekash --namespace dev --pod frontend status
+Target a pod in the dev namespace matching 'frontend'.
 
 .SH AUTHOR
 Rodney Peck
