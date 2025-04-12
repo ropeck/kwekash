@@ -1,32 +1,30 @@
 # kwekash
 
-**kwekash** is a shell utility to easily run `weka` commands on the first available matching pod in your WEKA Kubernetes cluster.
+**kwekash** is a Python utility to easily run `weka` commands on the first available matching pod in your WEKA Kubernetes cluster.
 
-It supports default actions, interactive mode, real-time monitoring via `watch`, multiple kubeconfig contexts, and advanced pod/namespace targeting.
-
----
+It supports:
+- `--namespace`, `--pod-match`, `--kubeconfig`
+- Default `weka status` behavior
+- Interactive shell with `-it`
+- Periodic status monitoring via `watch`
 
 ## 🔧 Installation
 
 ```bash
-git clone https://github.com/ropeck/kwekash.git
-cd kwekash
 make install
 ```
 
 This installs:
-- The `kwekash` command to `~/bin` or `~/.local/bin`
+- The `kwekash` Python script to `~/bin` or `~/.local/bin`
 - The manual page to `~/.local/share/man/man1/`
-
----
 
 ## 🧰 Usage
 
 ```bash
-kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod <pattern>] [-it] [watch [watch-options]] [weka subcommand]
+kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod-match <pattern>] [-it] [watch [watch-options]] [weka-subcommand]
 ```
 
-### 📘 Examples
+## 📘 Examples
 
 | Command                                                  | Description                                                  |
 |-----------------------------------------------------------|--------------------------------------------------------------|
@@ -34,39 +32,16 @@ kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod <pattern>] [-it] [watch 
 | `kwekash status`                                          | Run `weka status`                                           |
 | `kwekash local ps`                                        | Run `weka local ps`                                         |
 | `kwekash -it`                                             | Open interactive shell on the first matching pod            |
-| `kwekash watch status`                                   | Watch `weka status` every 2 seconds                         |
-| `kwekash watch -n 2 local ps`                            | Watch `weka local ps` every 2 seconds                       |
-| `kwekash --kubeconfig ~/.kube/staging`                   | Use an alternate kubeconfig file                            |
-| `kwekash --namespace dev --pod frontend status`    | Target a pod matching "frontend" in the "dev" namespace     |
-
----
-
-## 🔧 Advanced Pod Targeting
-
-Use these flags to customize the pod and namespace selection:
-
-| Option                  | Description                                                   |
-|-------------------------|---------------------------------------------------------------|
-| `--namespace <name>`    | Set the Kubernetes namespace (default: `weka-operator-system`) |
-| `--pod <pattern>` | Match a pod name substring (default: `drive`)                 |
-
----
-
-## 🌐 Kubeconfig Support
-
-- Specify a kubeconfig using `--kubeconfig <path>`
-- If not passed, `$KUBECONFIG` is used
-- If neither is set, `kwekash` will exit with an error
-
----
+| `kwekash watch status`                                    | Watch `weka status` every 2 seconds                         |
+| `kwekash watch -n 2 local ps`                             | Watch `weka local ps` every 2 seconds                       |
+| `kwekash --kubeconfig ~/.kube/staging`                    | Use a specific kubeconfig                                   |
+| `kwekash --namespace dev --pod-match frontend status`     | Match a different namespace and pod pattern                 |
 
 ## 🔍 Requirements
 
-- `kubectl` or [`kubecolor`](https://github.com/hidetatz/kubecolor)
-- A running WEKA cluster with pods (default: drive pods)
-- `watch` utility (installed in WEKA CLI containers)
-
----
+- Python 3.6+
+- `kubectl` or `kubecolor`
+- WEKA drive pods running in your cluster
 
 ## 📖 Manual Page
 
@@ -74,14 +49,12 @@ Use these flags to customize the pod and namespace selection:
 man kwekash
 ```
 
-If needed on macOS:
+To enable manpages on macOS:
 
 ```bash
 echo 'export MANPATH=$HOME/.local/share/man:$MANPATH' >> ~/.zshrc
 source ~/.zshrc
 ```
-
----
 
 ## 📝 License
 

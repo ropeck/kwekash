@@ -1,13 +1,13 @@
-.TH kwekash 1 "April 2025" "kwekash 1.4" "User Commands"
+.TH kwekash 1 "April 2025" "kwekash 2.0" "User Commands"
 .SH NAME
 kwekash \- run weka commands inside a WEKA drive pod
 
 .SH SYNOPSIS
-kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod <pattern>] [-it] [watch [watch-options]] [weka-subcommand ...]
+kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod-match <pattern>] [-it] [watch [watch-options]] [weka-subcommand ...]
 
 .SH DESCRIPTION
 Run weka CLI commands in the first matching WEKA pod in your Kubernetes cluster.
-Defaults to 'drive' pods in 'weka-operator-system' namespace.
+Now implemented in Python for better maintainability and flexibility.
 
 .SH OPTIONS
 .TP
@@ -19,8 +19,8 @@ Specify the kubeconfig to use. Required if KUBECONFIG is not set.
 Namespace to search for WEKA pods. Defaults to 'weka-operator-system'.
 
 .TP
---pod <pattern>
-String to match the pod name. Defaults to 'drive'.
+--pod-match <pattern>
+Substring to match the pod name. Defaults to 'drive'.
 
 .TP
 -it
@@ -44,7 +44,7 @@ kwekash watch -n 2 local ps
 Watch 'weka local ps' every 2 seconds.
 
 .TP
-kwekash --namespace dev --pod frontend status
+kwekash --namespace dev --pod-match frontend status
 Target a pod in the dev namespace matching 'frontend'.
 
 .SH AUTHOR

@@ -1,79 +1,58 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
-NAMESPACE="weka-operator-system"
-POD_MATCH="drive"
-KUBECONFIG_PATH=""
-ARGS=()
+import argparse
+import subprocess
+import sys
+import os
+import shutil
 
-usage() {
-  echo "Usage: kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod <pattern>] [-it] [watch [watch-options]] [weka-subcommand]..."
-  echo ""
-  echo "Examples:"
-  echo "  kwekash                                         # Run 'weka status' on the pod (default)"
-  echo "  kwekash -it                                     # Open interactive shell on first matching pod"
-  echo "  kwekash status                                  # Run 'weka status'"
-  echo "  kwekash local ps                                # Run 'weka local ps'"
-  echo "  kwekash watch status                            # Watch 'weka status'"
-  echo "  kwekash --pod compute status                    # Show status on compute pod"
-  echo "  kwekash --kubeconfig ~/.kube/dev.yaml           # Use alternate kubeconfig"
-  echo "  kwekash --help                                  # Show this help"
-}
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Run weka commands inside a WEKA drive pod in Kubernetes."
+    )
+    parser.add_argument("--kubeconfig", help="Path to kubeconfig file", default=os.environ.get("KUBECONFIG"))
+    parser.add_argument("--namespace", help="Kubernetes namespace", default="weka-operator-system")
+    parser.add_argument("--pod-match", "-p", help="Substring to match in pod name", default="drive")
+    parser.add_argument("-it", action="store_true", help="Open an interactive shell")
+    parser.add_argument("cmd", nargs=argparse.REMAINDER, help="Command to pass to weka or watch")
+    return parser.parse_args()
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --kubeconfig)
-      shift; KUBECONFIG_PATH="$1"; shift ;;
-    --namespace)
-      shift; NAMESPACE="$1"; shift ;;
-    --pod)
-      shift; POD_MATCH="$1"; shift ;;
-    --help)
-      usage; exit 0 ;;
-    *)
-      ARGS+=("$1"); shift ;;
-  esac
-done
+def run_cmd(command, shell=False):
+    print("🔧 Running:", " ".join(command) if isinstance(command, list) else command)
+    subprocess.run(command, check=False, shell=shell)
 
-if [[ -z "$KUBECONFIG_PATH" ]]; then
-  if [[ -n "$KUBECONFIG" ]]; then
-    KUBECONFIG_PATH="$KUBECONFIG"
-  else
-    echo "❌ Error: KUBECONFIG is not set and --kubeconfig was not provided."
-    exit 1
-  fi
-fi
+def main():
+    args = parse_args()
 
-KUBECMD=$(command -v kubecolor || echo "kubectl")
-KUBECTL="$KUBECMD --kubeconfig $KUBECONFIG_PATH"
-POD=$($KUBECTL get pods -n "$NAMESPACE" | grep -m1 "$POD_MATCH" | awk '{print $1}')
+    if not args.kubeconfig:
+        print("❌ Error: --kubeconfig must be set or $KUBECONFIG must be defined.")
+        sys.exit(1)
 
-echo "🔍 Using pod: $POD in namespace: $NAMESPACE"
-echo "📁 Using kubeconfig: $KUBECONFIG_PATH"
+    kubecmd = "kubecolor" if shutil.which("kubecolor") else "kubectl"
+    base_cmd = [kubecmd, "--kubeconfig", args.kubeconfig, "-n", args.namespace]
 
-if [[ "${ARGS[0]}" == "-it" ]]; then
-  echo "🔧 Running: $KUBECTL exec -it -n $NAMESPACE $POD -- bash"
-  $KUBECTL exec -it -n "$NAMESPACE" "$POD" -- bash
+    try:
+        pod_list = subprocess.check_output(base_cmd + ["get", "pods"]).decode().splitlines()
+        pod_name = next(line.split()[0] for line in pod_list if args.pod_match in line)
+    except StopIteration:
+        print(f"❌ Error: No pod found matching '{args.pod_match}' in namespace '{args.namespace}'")
+        sys.exit(1)
 
-elif [[ "${ARGS[0]}" == "watch" ]]; then
-  WATCH_OPTS=()
-  WEKA_ARGS=()
-  shift_args=("${ARGS[@]:1}")
+    print(f"🔍 Using pod: {pod_name} in namespace: {args.namespace}")
+    print(f"📁 Using kubeconfig: {args.kubeconfig}")
 
-  for arg in "${shift_args[@]}"; do
-    case "$arg" in
-      -*) WATCH_OPTS+=("$arg") ;;
-      *) WEKA_ARGS+=("$arg") ;;
-    esac
-  done
+    if args.it:
+        run_cmd(base_cmd + ["exec", "-it", pod_name, "--", "bash"])
+    elif args.cmd and args.cmd[0] == "watch":
+        watch_opts = []
+        weka_args = []
+        for arg in args.cmd[1:]:
+            (watch_opts if arg.startswith("-") else weka_args).append(arg)
+        run_cmd(base_cmd + ["exec", "-it", pod_name, "--", "watch"] + watch_opts + ["weka"] + weka_args)
+    elif not args.cmd:
+        run_cmd(base_cmd + ["exec", pod_name, "--", "weka", "status"])
+    else:
+        run_cmd(base_cmd + ["exec", pod_name, "--", "weka"] + args.cmd)
 
-  echo "🔧 Running: $KUBECTL exec -it -n $NAMESPACE $POD -- watch ${WATCH_OPTS[*]} weka ${WEKA_ARGS[*]}"
-  $KUBECTL exec -it -n "$NAMESPACE" "$POD" -- watch "${WATCH_OPTS[@]}" weka "${WEKA_ARGS[@]}"
-
-elif [[ ${#ARGS[@]} -eq 0 ]]; then
-  echo "🔧 Running: $KUBECTL exec -n $NAMESPACE $POD -- weka status"
-  $KUBECTL exec -n "$NAMESPACE" "$POD" -- weka status
-
-else
-  echo "🔧 Running: $KUBECTL exec -n $NAMESPACE $POD -- weka ${ARGS[*]}"
-  $KUBECTL exec -n "$NAMESPACE" "$POD" -- weka "${ARGS[@]}"
-fi
+if __name__ == "__main__":
+    main()
