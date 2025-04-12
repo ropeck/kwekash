@@ -1,95 +1,41 @@
-.TH kwekash 1 "April 2025" "kwekash 1.3" "User Commands"
-.SH NAME
-kwekash \- run weka commands inside a WEKA drive pod
+SCRIPT_NAME = kwekash
+BIN_SRC = bin/$(SCRIPT_NAME)
+MAN_SRC = man/$(SCRIPT_NAME).1
+INSTALL_BIN_DIR = $(if $(wildcard $(HOME)/bin),$(HOME)/bin,$(HOME)/.local/bin)
+INSTALL_MAN_DIR = $(HOME)/.local/share/man/man1
+BIN_TARGET = $(INSTALL_BIN_DIR)/$(SCRIPT_NAME)
+MAN_TARGET = $(INSTALL_MAN_DIR)/$(SCRIPT_NAME).1.gz
 
-.SH SYNOPSIS
-kwekash [--kubeconfig <path>] [-it] [watch [watch-options]] [weka-subcommand ...]
+install:
+	@echo "📦 Installing $(SCRIPT_NAME)..."
 
-.SH DESCRIPTION
-kwekash is a helper script to run weka CLI commands inside the first available
-WEKA drive pod in your Kubernetes cluster.
+	@mkdir -p $(INSTALL_BIN_DIR)
+	cp $(BIN_SRC) $(BIN_TARGET)
+	chmod +x $(BIN_TARGET)
+	@echo "✅ Installed binary to $(BIN_TARGET)"
 
-It simplifies debugging and monitoring common WEKA commands and supports interactive shell access,
-periodic status updates via watch, and targeting specific kubeconfig contexts.
+	@mkdir -p $(INSTALL_MAN_DIR)
+	cp $(MAN_SRC) $(INSTALL_MAN_DIR)/$(SCRIPT_NAME).1
+	gzip -f $(INSTALL_MAN_DIR)/$(SCRIPT_NAME).1
+	@echo "✅ Installed man page to $(MAN_TARGET)"
 
-.SH OPTIONS
-.TP
---kubeconfig <path>
-Specify the kubeconfig file to use when interacting with the Kubernetes cluster.
-If not specified, kwekash will attempt to use the KUBECONFIG environment variable.
+	@echo ""
+	@if ! command -v $(SCRIPT_NAME) > /dev/null; then \
+	  echo "⚠️  '$(SCRIPT_NAME)' is not in your PATH. Consider adding $(INSTALL_BIN_DIR) to it."; \
+	fi
 
-Note: This option is only used for selecting the target cluster. It is not passed to the `weka` command.
+	@echo ""
+	@echo "📘 To view the man page on macOS, you may need to add the manpath:"
+	@echo "   echo 'setenv MANPATH $(INSTALL_MAN_DIR):$$MANPATH' >> ~/.zshrc  # or ~/.bash_profile"
+	@echo "   source ~/.zshrc  # or open a new terminal"
 
-.TP
--it
-Open an interactive bash shell inside the pod.
+uninstall:
+	@echo "🧹 Uninstalling $(SCRIPT_NAME)..."
 
-.TP
-watch
-Run the given weka subcommand using the watch utility inside the pod.
-You may include standard watch flags such as -n (interval) or -d (highlight).
+	rm -f $(HOME)/bin/$(SCRIPT_NAME)
+	rm -f $(HOME)/.local/bin/$(SCRIPT_NAME)
+	rm -f $(INSTALL_MAN_DIR)/$(SCRIPT_NAME).1.gz
 
-.SH EXAMPLES
-.TP
-kwekash
-Run "weka status" on the pod.
+	@echo "✅ Uninstalled $(SCRIPT_NAME) from local user directories."
 
-.TP
-kwekash status
-Run "weka status" explicitly.
-
-.TP
-kwekash local ps
-Run "weka local ps" on the pod.
-
-.TP
-kwekash watch status
-Run "watch weka status" on the pod.
-
-.TP
-kwekash watch -n 2 local ps
-Run "watch -n 2 weka local ps" to refresh every 2 seconds.
-
-.TP
-kwekash -it
-Start an interactive shell on the pod.
-
-.TP
-kwekash --kubeconfig ~/.kube/staging
-Use a specific kubeconfig file to connect to a different cluster.
-
-.TP
-Example output of: kwekash watch -n 2 status \; alerts
-Watch command running every 2 seconds, showing status and active alerts.
-
-.nf
-Every 2.0s: weka status ; weka alerts                                          gaae4a4: Sat Apr 12 01:35:37 2025
-
-WekaIO v4.4.5.118-k8s.4 (CLI build 4.4.5.118-k8s.4)
-
-       cluster: cw-cohere-staging (ecc4fcb0-bba6-462c-b880-23085a1daff3)
-        status: OK (12 backend containers UP, 36 drives UP)
-    protection: 3+2 (Fully protected)
-     hot spare: 1 failure domains (22.63 TiB)
- drive storage: 113.15 TiB total, 112.01 TiB unprovisioned
-         cloud: connected
-       license: Unlicensed
-
-     io status: STARTED 6 hours ago (108 io-nodes UP, 936 Buckets UP)
-    link layer: Infiniband + Ethernet
-       clients: 9 connected
-         reads: 0 B/s (0 IO/s)
-        writes: 0 B/s (0 IO/s)
-    operations: 0 ops/s
-        alerts: 3 active alerts, use `weka alerts` to list them
-
-TYPE                       SEVERITY  START TIME  COUNT  TITLE                DESCRIPTION
-                     HOW TO HANDLE
-PartialHugepageAllocation  MAJOR     6:26:13h    2      Not enough memory    HostId<10> has fewer hugepages than
- requested. code: 1  Please check your system.
-NoClusterLicense           WARNING   6:26:18h    1      No license assigned  No license is assigned to the clust
-er.                  Obtain and install a license from get.weka.io.
-.fi
-
-.SH AUTHOR
-Rodney Peck
+.PHONY: install uninstall
