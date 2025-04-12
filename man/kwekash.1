@@ -58,5 +58,38 @@ Start an interactive shell on the pod.
 kwekash --kubeconfig ~/.kube/staging
 Use a specific kubeconfig file to connect to a different cluster.
 
+.TP
+Example output of: kwekash watch -n 2 status \; alerts
+Watch command running every 2 seconds, showing status and active alerts.
+
+.nf
+Every 2.0s: weka status ; weka alerts                                          gaae4a4: Sat Apr 12 01:35:37 2025
+
+WekaIO v4.4.5.118-k8s.4 (CLI build 4.4.5.118-k8s.4)
+
+       cluster: cw-cohere-staging (ecc4fcb0-bba6-462c-b880-23085a1daff3)
+        status: OK (12 backend containers UP, 36 drives UP)
+    protection: 3+2 (Fully protected)
+     hot spare: 1 failure domains (22.63 TiB)
+ drive storage: 113.15 TiB total, 112.01 TiB unprovisioned
+         cloud: connected
+       license: Unlicensed
+
+     io status: STARTED 6 hours ago (108 io-nodes UP, 936 Buckets UP)
+    link layer: Infiniband + Ethernet
+       clients: 9 connected
+         reads: 0 B/s (0 IO/s)
+        writes: 0 B/s (0 IO/s)
+    operations: 0 ops/s
+        alerts: 3 active alerts, use `weka alerts` to list them
+
+TYPE                       SEVERITY  START TIME  COUNT  TITLE                DESCRIPTION
+                     HOW TO HANDLE
+PartialHugepageAllocation  MAJOR     6:26:13h    2      Not enough memory    HostId<10> has fewer hugepages than
+ requested. code: 1  Please check your system.
+NoClusterLicense           WARNING   6:26:18h    1      No license assigned  No license is assigned to the clust
+er.                  Obtain and install a license from get.weka.io.
+.fi
+
 .SH AUTHOR
 Rodney Peck
