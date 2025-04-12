@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="kwekash",
-    version="2.1.0",
+    version="2.1.2",
     description="Run weka commands in WEKA drive pods inside Kubernetes.",
     author="Rodney Peck",
     author_email="fogcat5@gmail.com",

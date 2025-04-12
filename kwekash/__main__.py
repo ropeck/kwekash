@@ -13,6 +13,8 @@ def parse_args():
     parser.add_argument("--kubeconfig", help="Path to kubeconfig file", default=None)
     parser.add_argument("--namespace", help="Kubernetes namespace", default=None)
     parser.add_argument("--pod-match", "-p", help="Substring to match in pod name", default=None)
+    parser.add_argument("--term", help="Terminal type (e.g., xterm-256color)", default=None)
+    parser.add_argument("--no-color", action="store_true", help="Disable color output by not setting TERM")
     parser.add_argument("-it", action="store_true", help="Open an interactive shell")
     parser.add_argument("cmd", nargs=argparse.REMAINDER, help="Command to pass to weka or watch")
     return parser.parse_args()
@@ -27,7 +29,8 @@ def load_config():
 
 def run_cmd(command, shell=False):
     print("🔧 Running:", " ".join(command) if isinstance(command, list) else command)
-    subprocess.run(command, check=False, shell=shell)
+    subprocess.run(command, check=False, shell=shell,
+                   stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
 
 def main():
     config = load_config()
@@ -36,6 +39,7 @@ def main():
     kubeconfig = args.kubeconfig or os.environ.get("KUBECONFIG") or config.get("kubeconfig")
     namespace = args.namespace or config.get("namespace", "weka-operator-system")
     pod_match = args.pod_match or config.get("pod_match", "drive")
+    term = args.term or config.get("term", os.environ.get("TERM", "xterm-256color"))
 
     if not kubeconfig:
         print("❌ Error: --kubeconfig must be set, or $KUBECONFIG, or config file.")
@@ -61,11 +65,24 @@ def main():
         weka_args = []
         for arg in args.cmd[1:]:
             (watch_opts if arg.startswith("-") else weka_args).append(arg)
+        cmd = ["exec", "-it", pod_name, "--"]
+        if not args.no_color:
+            cmd += ["env", f"TERM={term}"]
+            watch_opts.append("-c")
+            weka_args = ["--color", "enabled"] + weka_args
         run_cmd(base_cmd + ["exec", "-it", pod_name, "--", "watch"] + watch_opts + ["weka"] + weka_args)
     elif not args.cmd:
-        run_cmd(base_cmd + ["exec", pod_name, "--", "weka", "status"])
+        cmd = ["exec", "-it", pod_name, "--"]
+        if not args.no_color:
+            cmd += ["env", f"TERM={term}"]
+        cmd += ["weka", "status"]
+        run_cmd(base_cmd + cmd)
     else:
-        run_cmd(base_cmd + ["exec", pod_name, "--", "weka"] + args.cmd)
+        cmd = ["exec", "-it", pod_name, "--"]
+        if not args.no_color:
+            cmd += ["env", f"TERM={term}"]
+        cmd += ["weka"] + args.cmd
+        run_cmd(base_cmd + cmd)
 
 if __name__ == "__main__":
     main()
