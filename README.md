@@ -20,8 +20,20 @@ It supports real-time monitoring, interactive shells, multiple clusters, and fle
 ### 📦 Option 1: From PyPI
 
 ```bash
-sudo apt install -y pipx
 pipx install kwekash
+
+```
+
+Note -- pipx is required to install the virtual env. It can be installed with these
+commands:
+
+```bash
+mac / osx:
+brew install pipx
+
+ubuntu:
+sudo apt install pipx
+
 ```
 
 Then just run:
