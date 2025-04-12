@@ -5,7 +5,7 @@ setup(
     version="2.0.0",
     description="Run weka commands in WEKA drive pods inside Kubernetes.",
     author="Rodney Peck",
-    author_email="rodney@example.com",
+    author_email="fogcat5@gmail.com",
     license="MIT",
     packages=["kwekash"],
     entry_points={
