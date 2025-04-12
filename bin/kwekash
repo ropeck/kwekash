@@ -4,10 +4,11 @@ NAMESPACE="weka-operator-system"
 POD=$(kubecolor get pods -n "$NAMESPACE" | grep -m1 drive | awk '{print $1}')
 
 usage() {
-  echo "Usage: kwekash [weka subcommand]..."
+  echo "Usage: kwekash [-it] [weka subcommand]..."
   echo ""
   echo "Examples:"
-  echo "  kwekash                 # Open interactive shell on first WEKA drive pod"
+  echo "  kwekash                 # Run 'weka status' on the pod (default)"
+  echo "  kwekash -it             # Open interactive shell on first WEKA drive pod"
   echo "  kwekash status          # Run 'weka status' on the pod"
   echo "  kwekash local ps        # Run 'weka local ps' on the pod"
   echo "  kwekash --help          # Show this help"
@@ -18,8 +19,15 @@ if [[ "$1" == "--help" ]]; then
   exit 0
 fi
 
-if [ $# -eq 0 ]; then
+echo "🔍 Using pod: $POD in namespace: $NAMESPACE"
+
+if [[ "$1" == "-it" ]]; then
+  echo "🔧 Running: kubecolor exec -it -n $NAMESPACE $POD -- bash"
   kubecolor exec -it -n "$NAMESPACE" "$POD" -- bash
+elif [ $# -eq 0 ]; then
+  echo "🔧 Running: kubecolor exec -n $NAMESPACE $POD -- weka status"
+  kubecolor exec -n "$NAMESPACE" "$POD" -- weka status
 else
+  echo "🔧 Running: kubecolor exec -n $NAMESPACE $POD -- weka $*"
   kubecolor exec -n "$NAMESPACE" "$POD" -- weka "$@"
 fi
