@@ -9,7 +9,7 @@ It supports default actions, interactive mode, real-time monitoring via `watch`,
 ## 🔧 Installation
 
 ```bash
-git clone https://github.com/yourusername/kwekash.git
+git clone https://github.com/ropeck/kwekash.git
 cd kwekash
 make install
 ```
