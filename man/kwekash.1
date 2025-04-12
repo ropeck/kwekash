@@ -1,28 +1,30 @@
-.TH KWEKASH 1 "April 2025" "kwekash 1.0" "User Commands"
+.TH kwekash 1 "April 2025" "kwekash 1.0" "User Commands"
 .SH NAME
 kwekash \- run weka commands inside a WEKA drive pod
 
 .SH SYNOPSIS
-.B kwekash
-[Iweka_subcommandR]
+kwekash [weka_subcommand]
 
 .SH DESCRIPTION
-This tool allows you to run BwekaR CLI commands inside the first available WEKA drive pod found in your Kubernetes cluster.
+This tool allows you to run weka CLI commands inside the first available WEKA drive pod
+found in your Kubernetes cluster.
 
 If no arguments are passed, it opens an interactive shell.
 
 .SH EXAMPLES
 .TP
-BkwekashR
+kwekash
 Start an interactive shell on the drive pod.
 
 .TP
-Bkwekash statusR
-Run Bweka statusR on the pod.
+kwekash status
+Run "weka status" on the pod.
 
 .TP
-Bkwekash local psR
-Run Bweka local psR on the pod.
+kwekash local ps
+Run "weka local ps" on the pod.
 
-.SH AUTHOR
-Rodney Peck
+.TP
+kwekash --help
+Show usage information.
+

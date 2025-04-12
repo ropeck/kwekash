@@ -2,7 +2,7 @@ SCRIPT_NAME = kwekash
 BIN_SRC = bin/$(SCRIPT_NAME)
 MAN_SRC = man/$(SCRIPT_NAME).1
 INSTALL_BIN_DIR = $(if $(wildcard $(HOME)/bin),$(HOME)/bin,$(HOME)/.local/bin)
-INSTALL_MAN_DIR = $(HOME)/.local/share/man/man1)
+INSTALL_MAN_DIR = $(HOME)/.local/share/man/man1
 BIN_TARGET = $(INSTALL_BIN_DIR)/$(SCRIPT_NAME)
 MAN_TARGET = $(INSTALL_MAN_DIR)/$(SCRIPT_NAME).1.gz
 
