@@ -1,0 +1,25 @@
+#!/bin/bash
+
+NAMESPACE="weka-operator-system"
+POD=$(kubecolor get pods -n "$NAMESPACE" | grep -m1 drive | awk '{print $1}')
+
+usage() {
+  echo "Usage: kwekash [weka subcommand]..."
+  echo ""
+  echo "Examples:"
+  echo "  kwekash                 # Open interactive shell on first WEKA drive pod"
+  echo "  kwekash status          # Run 'weka status' on the pod"
+  echo "  kwekash local ps        # Run 'weka local ps' on the pod"
+  echo "  kwekash --help          # Show this help"
+}
+
+if [[ "$1" == "--help" ]]; then
+  usage
+  exit 0
+fi
+
+if [ $# -eq 0 ]; then
+  kubecolor exec -it -n "$NAMESPACE" "$POD" -- bash
+else
+  kubecolor exec -n "$NAMESPACE" "$POD" -- weka "$@"
+fi
