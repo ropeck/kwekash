@@ -4,13 +4,15 @@ NAMESPACE="weka-operator-system"
 POD=$(kubecolor get pods -n "$NAMESPACE" | grep -m1 drive | awk '{print $1}')
 
 usage() {
-  echo "Usage: kwekash [-it] [weka subcommand]..."
+  echo "Usage: kwekash [-it] [watch [watch-options] weka-subcommand]..."
   echo ""
   echo "Examples:"
   echo "  kwekash                 # Run 'weka status' on the pod (default)"
   echo "  kwekash -it             # Open interactive shell on first WEKA drive pod"
   echo "  kwekash status          # Run 'weka status' on the pod"
   echo "  kwekash local ps        # Run 'weka local ps' on the pod"
+  echo "  kwekash watch status    # Run 'watch weka status' on the pod"
+  echo "  kwekash watch -n 2 local ps  # Run 'watch -n 2 weka local ps'"
   echo "  kwekash --help          # Show this help"
 }
 
@@ -24,9 +26,26 @@ echo "🔍 Using pod: $POD in namespace: $NAMESPACE"
 if [[ "$1" == "-it" ]]; then
   echo "🔧 Running: kubecolor exec -it -n $NAMESPACE $POD -- bash"
   kubecolor exec -it -n "$NAMESPACE" "$POD" -- bash
+
+elif [[ "$1" == "watch" ]]; then
+  shift
+  WATCH_OPTS=()
+  WEKA_ARGS=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -*) WATCH_OPTS+=("$1"); shift ;;
+      *) WEKA_ARGS+=("$1"); shift ;;
+    esac
+  done
+
+  echo "🔧 Running: kubecolor exec -n $NAMESPACE $POD -- watch ${WATCH_OPTS[*]} weka ${WEKA_ARGS[*]}"
+  kubecolor exec -n "$NAMESPACE" "$POD" -- watch "${WATCH_OPTS[@]}" weka "${WEKA_ARGS[@]}"
+
 elif [ $# -eq 0 ]; then
   echo "🔧 Running: kubecolor exec -n $NAMESPACE $POD -- weka status"
   kubecolor exec -n "$NAMESPACE" "$POD" -- weka status
+
 else
   echo "🔧 Running: kubecolor exec -n $NAMESPACE $POD -- weka $*"
   kubecolor exec -n "$NAMESPACE" "$POD" -- weka "$@"
