@@ -1,18 +1,26 @@
-.TH kwekash 1 "April 2025" "kwekash 1.0" "User Commands"
+.TH kwekash 1 "April 2025" "kwekash 1.1" "User Commands"
 .SH NAME
 kwekash \- run weka commands inside a WEKA drive pod
 
 .SH SYNOPSIS
-kwekash [-it] [weka_subcommand]
+kwekash [-it] [watch [watch-options]] [weka-subcommand ...]
 
 .SH DESCRIPTION
-This tool allows you to run weka CLI commands inside the first available WEKA drive pod
+kwekash is a helper script to run weka CLI commands inside the first available WEKA drive pod
 in your Kubernetes cluster.
+
+By default, it runs "weka status". You can also pass any weka command, open an interactive shell,
+or prefix the command with "watch" to monitor output over time.
 
 .SH OPTIONS
 .TP
 -it
-Open an interactive shell in the drive pod.
+Open an interactive shell on the pod.
+
+.TP
+watch
+Prefix to run weka commands using the watch utility inside the pod.
+Supports optional watch flags such as -n, -d, etc.
 
 .SH EXAMPLES
 .TP
@@ -20,14 +28,24 @@ kwekash
 Run "weka status" on the pod.
 
 .TP
-kwekash -it
-Start an interactive shell on the pod.
-
-.TP
 kwekash status
-Run "weka status" on the pod.
+Run "weka status" explicitly.
 
 .TP
 kwekash local ps
 Run "weka local ps" on the pod.
 
+.TP
+kwekash watch status
+Run "watch weka status" inside the pod.
+
+.TP
+kwekash watch -n 2 local ps
+Run "watch -n 2 weka local ps" to refresh every 2 seconds.
+
+.TP
+kwekash -it
+Start an interactive shell session inside the pod.
+
+.SH AUTHOR
+Rodney Peck
