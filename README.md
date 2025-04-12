@@ -7,6 +7,7 @@ It supports real-time monitoring, interactive shells, multiple clusters, and fle
 ---
 
 ## ✨ Features
+<img src="static/kwekash-flowchart.png" alt="kwekash flowchart" width="300" align="right">
 
 - Run any `weka` CLI command inside the cluster.
 - Target specific pods by substring (`--pod-match`) and namespace (`--namespace`).
