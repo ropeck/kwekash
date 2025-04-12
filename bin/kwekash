@@ -3,20 +3,34 @@
 NAMESPACE="weka-operator-system"
 KUBECONFIG_PATH=""
 
-# Parse kubeconfig option manually
-if [[ "$1" == "--kubeconfig" ]]; then
-  shift
-  if [[ -z "$1" ]]; then
-    echo "❌ Error: --kubeconfig requires a path argument."
+# First: extract --kubeconfig from args if present
+ARGS=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --kubeconfig)
+      shift
+      if [[ -z "$1" ]]; then
+        echo "❌ Error: --kubeconfig requires a path argument."
+        exit 1
+      fi
+      KUBECONFIG_PATH="$1"
+      shift
+      ;;
+    *)
+      ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# Default to env var if not passed explicitly
+if [[ -z "$KUBECONFIG_PATH" ]]; then
+  if [[ -n "$KUBECONFIG" ]]; then
+    KUBECONFIG_PATH="$KUBECONFIG"
+  else
+    echo "❌ Error: KUBECONFIG is not set and --kubeconfig was not provided."
     exit 1
   fi
-  KUBECONFIG_PATH="$1"
-  shift
-elif [[ -n "$KUBECONFIG" ]]; then
-  KUBECONFIG_PATH="$KUBECONFIG"
-else
-  echo "❌ Error: KUBECONFIG is not set and --kubeconfig was not provided."
-  exit 1
 fi
 
 # Use kubecolor if available, fallback to kubectl
@@ -27,10 +41,10 @@ KUBECTL="$KUBECMD --kubeconfig $KUBECONFIG_PATH"
 POD=$($KUBECTL get pods -n "$NAMESPACE" | grep -m1 drive | awk '{print $1}')
 
 usage() {
-  echo "Usage: kwekash [--kubeconfig <path>] [-it] [watch [watch-options] weka-subcommand]..."
+  echo "Usage: kwekash [--kubeconfig <path>] [-it] [watch [watch-options]] [weka-subcommand]..."
   echo ""
   echo "Examples:"
-  echo "  kwekash --kubeconfig ~/.kube/devconfig         # Use alternate kubeconfig"
+  echo "  kwekash --kubeconfig ~/.kube/dev.yaml          # Use alternate kubeconfig"
   echo "  kwekash                                        # Run 'weka status' on the pod"
   echo "  kwekash -it                                    # Open interactive shell"
   echo "  kwekash watch status                           # Run 'watch weka status'"
@@ -38,7 +52,7 @@ usage() {
   echo "  kwekash --help                                 # Show this help"
 }
 
-if [[ "$1" == "--help" ]]; then
+if [[ "${ARGS[0]}" == "--help" ]]; then
   usage
   exit 0
 fi
@@ -46,30 +60,30 @@ fi
 echo "🔍 Using pod: $POD in namespace: $NAMESPACE"
 echo "📁 Using kubeconfig: $KUBECONFIG_PATH"
 
-if [[ "$1" == "-it" ]]; then
+if [[ "${ARGS[0]}" == "-it" ]]; then
   echo "🔧 Running: $KUBECTL exec -it -n $NAMESPACE $POD -- bash"
   $KUBECTL exec -it -n "$NAMESPACE" "$POD" -- bash
 
-elif [[ "$1" == "watch" ]]; then
-  shift
+elif [[ "${ARGS[0]}" == "watch" ]]; then
   WATCH_OPTS=()
   WEKA_ARGS=()
+  shift_args=("${ARGS[@]:1}")
 
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      -*) WATCH_OPTS+=("$1"); shift ;;
-      *) WEKA_ARGS+=("$1"); shift ;;
+  for arg in "${shift_args[@]}"; do
+    case "$arg" in
+      -*) WATCH_OPTS+=("$arg") ;;
+      *) WEKA_ARGS+=("$arg") ;;
     esac
   done
 
   echo "🔧 Running: $KUBECTL exec -it -n $NAMESPACE $POD -- watch ${WATCH_OPTS[*]} weka ${WEKA_ARGS[*]}"
   $KUBECTL exec -it -n "$NAMESPACE" "$POD" -- watch "${WATCH_OPTS[@]}" weka "${WEKA_ARGS[@]}"
 
-elif [ $# -eq 0 ]; then
+elif [[ ${#ARGS[@]} -eq 0 ]]; then
   echo "🔧 Running: $KUBECTL exec -n $NAMESPACE $POD -- weka status"
   $KUBECTL exec -n "$NAMESPACE" "$POD" -- weka status
 
 else
-  echo "🔧 Running: $KUBECTL exec -n $NAMESPACE $POD -- weka $*"
-  $KUBECTL exec -n "$NAMESPACE" "$POD" -- weka "$@"
+  echo "🔧 Running: $KUBECTL exec -n $NAMESPACE $POD -- weka ${ARGS[*]}"
+  $KUBECTL exec -n "$NAMESPACE" "$POD" -- weka "${ARGS[@]}"
 fi
