@@ -15,7 +15,30 @@ It supports real-time monitoring, interactive shells, multiple clusters, and fle
 - Open interactive shells with `-it`.
 - Works with both `kubectl` and `kubecolor`.
 
+<div style="clear: both;"></div>
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## 🔧 Installation
 
