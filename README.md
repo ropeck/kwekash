@@ -5,9 +5,9 @@
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/kwekash.git
+git clone https://github.com/ropeck/kwekash.git
 cd kwekash
-./install.sh
+make install
 ```
 
 ## Usage
@@ -17,6 +17,13 @@ kwekash                # Interactive shell on WEKA drive pod
 kwekash status         # Run 'weka status'
 kwekash local ps       # Run 'weka local ps'
 kwekash --help         # Show usage
+```
+
+## Remove
+
+```bash
+cd kwekash
+make uninstall
 ```
 
 ## Requirements
