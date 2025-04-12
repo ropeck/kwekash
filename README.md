@@ -1,4 +1,5 @@
 # kwekash
+<img src="static/kwekash.png" alt="kwekash icon" width="64" height="64" align="right">
 
 **kwekash** is a Python CLI tool for running `weka` commands inside the first matching WEKA pod in your Kubernetes cluster.  
 It supports real-time monitoring, interactive shells, multiple clusters, and flexible pod targeting.
