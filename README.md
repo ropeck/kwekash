@@ -7,7 +7,7 @@ It supports real-time monitoring, interactive shells, multiple clusters, and fle
 ---
 
 ## ✨ Features
-<img src="static/kwekash-flowchart.png" alt="kwekash flowchart" width="300" align="right">
+<img src="static/kwekash-flowchart.png" alt="kwekash flowchart" width="300" >
 
 - Run any `weka` CLI command inside the cluster.
 - Target specific pods by substring (`--pod-match`) and namespace (`--namespace`).
@@ -15,31 +15,10 @@ It supports real-time monitoring, interactive shells, multiple clusters, and fle
 - Open interactive shells with `-it`.
 - Works with both `kubectl` and `kubecolor`.
 
-<div style="clear: both;"></div>
+
 ---
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<div style="clear: both;"></div>
 ## 🔧 Installation
 
 ### 📦 Option 1: From PyPI
