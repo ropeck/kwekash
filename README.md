@@ -94,6 +94,49 @@ kwekash [--kubeconfig <path>] [--namespace <ns>] [--pod-match <pattern>] [-it] [
 
 ---
 
+### 🛠 Optional Configuration File
+
+You can configure default values for `kwekash` using a standard Python-style config file at:
+
+```
+~/.config/kwekash/config.ini
+```
+
+This file is **optional**. If present, it will provide defaults for:
+
+- `--kubeconfig` (overrides `$KUBECONFIG` if not set)
+- `--namespace`
+- `--pod-match`
+
+#### 🔧 Example config.ini
+
+```ini
+[kwekash]
+kubeconfig = /Users/alex/.kube/weka-prod.yaml
+namespace = weka-operator-system
+pod_match = drive
+```
+
+With this in place, you can run `kwekash` without needing to pass any flags:
+
+```bash
+kwekash status
+```
+
+---
+
+### ⚙️ Precedence Order
+
+For each setting, `kwekash` will use:
+
+1. **Command-line flag**, if given
+2. `$KUBECONFIG` environment variable (for kubeconfig only)
+3. **Config file** (`~/.config/kwekash/config.ini`)
+4. Built-in defaults (`weka-operator-system`, `drive`)
+
+---
+
+
 ## 🛠 Development
 
 Install build tools and publish:
