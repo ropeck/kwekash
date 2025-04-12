@@ -2,8 +2,14 @@
 
 set -e
 
-TARGET="$HOME/.local/bin"
 SCRIPT_NAME="kwekash"
+
+if [ -d "$HOME/bin" ]; then
+  TARGET="$HOME/bin"
+else
+  TARGET="$HOME/.local/bin"
+fi
+
 INSTALL_PATH="$TARGET/$SCRIPT_NAME"
 
 echo "Installing $SCRIPT_NAME to $INSTALL_PATH..."
@@ -17,7 +23,7 @@ if ! command -v "$SCRIPT_NAME" &>/dev/null; then
   echo "⚠️  '$SCRIPT_NAME' is not in your PATH."
   echo "You can add it by appending this to your shell profile:"
   echo ""
-  echo "    export PATH=\"$HOME/.local/bin:\$PATH\""
+  echo "    export PATH=\"$TARGET:\$PATH\""
   echo ""
   echo "Then restart your terminal or run: source ~/.zshrc (or ~/.bash_profile)"
 else
