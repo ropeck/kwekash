@@ -22,9 +22,12 @@ install:
 	@echo ""
 	@if ! command -v $(SCRIPT_NAME) > /dev/null; then \
 	  echo "⚠️  '$(SCRIPT_NAME)' is not in your PATH. Consider adding $(INSTALL_BIN_DIR) to it."; \
-	else \
-	  echo "You can now run '$(SCRIPT_NAME)' and 'man $(SCRIPT_NAME)'."; \
 	fi
+
+	@echo ""
+	@echo "📘 To view the man page on macOS, you may need to add the manpath:"
+	@echo "   echo 'export MANPATH=\$$HOME/.local/share/man:\$$MANPATH' >> ~/.zshrc"
+	@echo "   source ~/.zshrc  # or open a new terminal"
 
 uninstall:
 	@echo "🧹 Uninstalling $(SCRIPT_NAME)..."
