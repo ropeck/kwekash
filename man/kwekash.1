@@ -1,26 +1,33 @@
-.TH kwekash 1 "April 2025" "kwekash 1.1" "User Commands"
+.TH kwekash 1 "April 2025" "kwekash 1.2" "User Commands"
 .SH NAME
 kwekash \- run weka commands inside a WEKA drive pod
 
 .SH SYNOPSIS
-kwekash [-it] [watch [watch-options]] [weka-subcommand ...]
+kwekash [--kubeconfig <path>] [-it] [watch [watch-options]] [weka-subcommand ...]
 
 .SH DESCRIPTION
-kwekash is a helper script to run weka CLI commands inside the first available WEKA drive pod
-in your Kubernetes cluster.
+kwekash is a helper script to run weka CLI commands inside the first available
+WEKA drive pod in your Kubernetes cluster.
 
-By default, it runs "weka status". You can also pass any weka command, open an interactive shell,
-or prefix the command with "watch" to monitor output over time.
+By default, it runs "weka status". You can also:
+- Pass any weka command (e.g., "local ps")
+- Run interactively with -it
+- Prefix with "watch" to refresh output in real-time
 
 .SH OPTIONS
 .TP
+--kubeconfig <path>
+Specify the kubeconfig file to use. If not provided, kwekash will use the
+KUBECONFIG environment variable. If neither is set, kwekash exits with an error.
+
+.TP
 -it
-Open an interactive shell on the pod.
+Open an interactive bash shell inside the pod.
 
 .TP
 watch
-Prefix to run weka commands using the watch utility inside the pod.
-Supports optional watch flags such as -n, -d, etc.
+Run the given weka subcommand using the watch utility inside the pod.
+You may include standard watch flags such as -n (interval) or -d (highlight).
 
 .SH EXAMPLES
 .TP
@@ -37,7 +44,7 @@ Run "weka local ps" on the pod.
 
 .TP
 kwekash watch status
-Run "watch weka status" inside the pod.
+Run "watch weka status" on the pod.
 
 .TP
 kwekash watch -n 2 local ps
@@ -45,7 +52,8 @@ Run "watch -n 2 weka local ps" to refresh every 2 seconds.
 
 .TP
 kwekash -it
-Start an interactive shell session inside the pod.
+Start an interactive shell on the pod.
 
-.SH AUTHOR
-Rodney Peck
+.TP
+kwekash --kubeconfig ~/.kube/staging
+Use a specific kubeconfig file to connect
