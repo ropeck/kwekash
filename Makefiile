@@ -1,0 +1,28 @@
+SCRIPT_NAME = kwekash
+BIN_SRC = bin/$(SCRIPT_NAME)
+MAN_SRC = man/$(SCRIPT_NAME).1
+INSTALL_BIN_DIR = $(if $(wildcard $(HOME)/bin),$(HOME)/bin,$(HOME)/.local/bin)
+INSTALL_MAN_DIR = $(HOME)/.local/share/man/man1
+
+install:
+	@echo "Installing $(SCRIPT_NAME) to $(INSTALL_BIN_DIR)..."
+	@mkdir -p $(INSTALL_BIN_DIR)
+	@cp $(BIN_SRC) $(INSTALL_BIN_DIR)/
+	@chmod +x $(INSTALL_BIN_DIR)/$(SCRIPT_NAME)
+
+	@echo "Installing man page to $(INSTALL_MAN_DIR)..."
+	@mkdir -p $(INSTALL_MAN_DIR)
+	@cp $(MAN_SRC) $(INSTALL_MAN_DIR)/
+	@gzip -f $(INSTALL_MAN_DIR)/$(SCRIPT_NAME).1
+
+	@echo "✅ Installed successfully."
+	@echo "   You may need to add '$(INSTALL_BIN_DIR)' to your PATH."
+
+uninstall:
+	@echo "Uninstalling $(SCRIPT_NAME)..."
+	@rm -f $(HOME)/bin/$(SCRIPT_NAME)
+	@rm -f $(HOME)/.local/bin/$(SCRIPT_NAME)
+	@rm -f $(INSTALL_MAN_DIR)/$(SCRIPT_NAME).1.gz
+	@echo "✅ Uninstalled successfully."
+
+.PHONY: install uninstall
